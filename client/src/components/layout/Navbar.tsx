@@ -30,13 +30,12 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/">
-              <a className="flex items-center">
+              <a>
                 <img 
                   src="/logo.png" 
                   alt="Sitaram Social Welfare Organization Logo" 
-                  className="h-12 w-auto"
+                  className="h-14 w-auto"
                 />
-                <span className="ml-3 text-lg font-bold hidden sm:block">SSWO</span>
               </a>
             </Link>
           </div>
