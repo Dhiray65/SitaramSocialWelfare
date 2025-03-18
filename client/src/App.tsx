@@ -14,6 +14,7 @@ import Membership from "@/pages/membership";
 import Donate from "@/pages/donate";
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
+import Events from "@/pages/events"; // Add to imports
 
 // Import i18n configuration
 import "./lib/i18n";
@@ -39,6 +40,7 @@ function Router() {
                 <Route path="/contact" component={Contact} />
                 <Route path="/membership" component={Membership} />
                 <Route path="/donate" component={Donate} />
+                <Route path="/events" component={Events} /> {/* Add to public routes Switch */}
                 <Route component={NotFound} />
               </Switch>
             </main>

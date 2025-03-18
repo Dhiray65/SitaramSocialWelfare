@@ -1,5 +1,7 @@
 import { type Member, type Donation, type Contact, type Admin, type Subscriber, type InsertMember, type InsertDonation, type InsertContact, type InsertAdmin, type InsertSubscriber } from "@shared/schema";
 import bcrypt from "bcrypt";
+import { type Event, type InsertEvent } from "@shared/schema"; // Added import for Event and InsertEvent
+
 
 export interface IStorage {
   // Members
@@ -27,6 +29,12 @@ export interface IStorage {
   createAdmin(admin: InsertAdmin): Promise<Admin>;
   getAdminByUsername(username: string): Promise<Admin | undefined>;
   validateAdminCredentials(username: string, password: string): Promise<boolean>;
+
+  // Events
+  createEvent(event: InsertEvent): Promise<Event>;
+  getEvent(id: number): Promise<Event | undefined>;
+  getAllEvents(): Promise<Event[]>;
+  updateEventStatus(id: number, status: string): Promise<Event>;
 }
 
 export class MemStorage implements IStorage {
@@ -40,6 +48,8 @@ export class MemStorage implements IStorage {
   private currentContactId: number;
   private currentSubscriberId: number;
   private currentAdminId: number;
+  private events: Map<number, Event>; // Added events map
+  private currentEventId: number;     // Added currentEventId
 
   constructor() {
     this.members = new Map();
@@ -52,6 +62,8 @@ export class MemStorage implements IStorage {
     this.currentContactId = 1;
     this.currentSubscriberId = 1;
     this.currentAdminId = 1;
+    this.events = new Map();          //Initialized events map
+    this.currentEventId = 1;         //Initialized currentEventId
 
     // Create default admin account
     this.createAdmin({
@@ -178,6 +190,37 @@ export class MemStorage implements IStorage {
     const admin = await this.getAdminByUsername(username);
     if (!admin) return false;
     return bcrypt.compare(password, admin.password);
+  }
+
+  // Events
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const id = this.currentEventId++;
+    const newEvent = {
+      ...event,
+      id,
+      status: 'upcoming',
+      createdAt: new Date()
+    };
+    this.events.set(id, newEvent);
+    return newEvent;
+  }
+
+  async getEvent(id: number): Promise<Event | undefined> {
+    return this.events.get(id);
+  }
+
+  async getAllEvents(): Promise<Event[]> {
+    return Array.from(this.events.values());
+  }
+
+  async updateEventStatus(id: number, status: string): Promise<Event> {
+    const event = this.events.get(id);
+    if (!event) {
+      throw new Error('Event not found');
+    }
+    const updatedEvent = { ...event, status };
+    this.events.set(id, updatedEvent);
+    return updatedEvent;
   }
 }
 

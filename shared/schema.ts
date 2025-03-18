@@ -34,7 +34,6 @@ export const contacts = pgTable("contacts", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// Newsletter subscribers table
 export const subscribers = pgTable("subscribers", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -43,7 +42,6 @@ export const subscribers = pgTable("subscribers", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// Admin table
 export const admins = pgTable("admins", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -51,21 +49,33 @@ export const admins = pgTable("admins", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// Schema definitions
-export const insertMemberSchema = createInsertSchema(members).omit({ 
-  id: true,
-  createdAt: true 
+// Event table
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  date: timestamp("date").notNull(),
+  location: text("location").notNull(),
+  image: text("image"),
+  status: text("status").notNull().default('upcoming'),
+  createdAt: timestamp("created_at").defaultNow()
 });
 
-export const insertDonationSchema = createInsertSchema(donations).omit({ 
+// Schema definitions
+export const insertMemberSchema = createInsertSchema(members).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertDonationSchema = createInsertSchema(donations).omit({
   id: true,
   createdAt: true,
   paymentStatus: true
 });
 
-export const insertContactSchema = createInsertSchema(contacts).omit({ 
+export const insertContactSchema = createInsertSchema(contacts).omit({
   id: true,
-  createdAt: true 
+  createdAt: true
 });
 
 export const insertSubscriberSchema = createInsertSchema(subscribers).omit({
@@ -80,6 +90,14 @@ export const insertSubscriberSchema = createInsertSchema(subscribers).omit({
 export const insertAdminSchema = createInsertSchema(admins).omit({
   id: true,
   createdAt: true
+});
+
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true,
+  status: true
+}).extend({
+  date: z.string().transform((str) => new Date(str))
 });
 
 export const loginSchema = z.object({
@@ -100,3 +118,5 @@ export type Donation = typeof donations.$inferSelect;
 export type Contact = typeof contacts.$inferSelect;
 export type Subscriber = typeof subscribers.$inferSelect;
 export type Admin = typeof admins.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Event = typeof events.$inferSelect;

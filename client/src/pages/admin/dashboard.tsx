@@ -11,7 +11,8 @@ import {
   Mail as MailIcon,
   ChevronRight,
   CheckCircle,
-  XCircle
+  XCircle,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +30,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { format } from 'date-fns';
 
 function AdminNav() {
   const [, setLocation] = useLocation();
@@ -54,6 +56,7 @@ function AdminNav() {
     { href: '/admin/dashboard/donations', label: 'Donations', icon: Heart },
     { href: '/admin/dashboard/contacts', label: 'Contacts', icon: Mail },
     { href: '/admin/dashboard/subscribers', label: 'Newsletter', icon: MailIcon },
+    { href: '/admin/dashboard/events', label: 'Events', icon: Calendar },
   ];
 
   return (
@@ -278,6 +281,87 @@ function SubscribersTable() {
   );
 }
 
+function EventsTable() {
+  const { data: events = [] } = useQuery({
+    queryKey: ['/api/events'],
+  });
+
+  const { toast } = useToast();
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const res = await apiRequest('PATCH', `/api/events/${id}/status`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      toast({
+        title: 'Status updated successfully',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Failed to update status',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+  const [, setLocation] = useLocation();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Events</CardTitle>
+        <CardDescription>Manage organization events</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4">
+          <Button onClick={() => setLocation('/admin/dashboard/events/new')}>
+            Add New Event
+          </Button>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {events.map((event) => (
+              <TableRow key={event.id}>
+                <TableCell>{event.title}</TableCell>
+                <TableCell>{format(new Date(event.date), 'PPP')}</TableCell>
+                <TableCell>{event.location}</TableCell>
+                <TableCell>{event.status}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    {['upcoming', 'ongoing', 'completed'].map((status) => (
+                      <Button
+                        key={status}
+                        size="sm"
+                        variant={event.status === status ? 'default' : 'outline'}
+                        onClick={() => updateStatusMutation.mutate({ id: event.id, status })}
+                        disabled={event.status === status}
+                      >
+                        {status}
+                      </Button>
+                    ))}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background flex">
@@ -290,6 +374,7 @@ export default function AdminDashboard() {
           <Route path="/admin/dashboard/donations" component={DonationsTable} />
           <Route path="/admin/dashboard/contacts" component={ContactsTable} />
           <Route path="/admin/dashboard/subscribers" component={SubscribersTable} />
+          <Route path="/admin/dashboard/events" component={EventsTable} />
         </Switch>
       </main>
     </div>
