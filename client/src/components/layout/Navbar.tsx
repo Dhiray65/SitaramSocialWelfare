@@ -30,11 +30,12 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/">
-              <a className="flex items-center">
+              <a className="block">
                 <img 
                   src="/logo.png" 
                   alt="Sitaram Social Welfare Organization"
-                  className="h-14 w-14 object-contain"
+                  className="h-16 w-16"
+                  style={{ objectFit: 'contain', objectPosition: 'center' }}
                 />
               </a>
             </Link>
