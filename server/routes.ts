@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMemberSchema, insertDonationSchema, insertContactSchema, loginSchema, insertSubscriberSchema } from "@shared/schema";
+import { insertMemberSchema, insertDonationSchema, insertContactSchema, loginSchema, insertSubscriberSchema, insertEventSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
 import MemoryStore from "memorystore";
@@ -204,6 +204,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   });
+
+  // Event routes
+  app.post("/api/events", requireAdmin, async (req, res) => {
+    try {
+      const eventData = insertEventSchema.parse(req.body);
+      const event = await storage.createEvent(eventData);
+      res.status(201).json(event);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid event data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create event" });
+      }
+    }
+  });
+
+  app.get("/api/events", async (_req, res) => {
+    try {
+      const events = await storage.getAllEvents();
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const event = await storage.getEvent(id);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  app.patch("/api/events/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+
+      if (!['upcoming', 'ongoing', 'completed'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const event = await storage.updateEventStatus(id, status);
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update event status" });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;
