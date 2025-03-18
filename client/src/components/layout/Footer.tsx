@@ -1,8 +1,27 @@
 import { useTranslation } from 'react-i18next';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import { SiFacebook, SiInstagram, SiYoutube } from 'react-icons/si';
 
 export default function Footer() {
   const { t } = useTranslation();
+
+  const socialLinks = [
+    { 
+      icon: SiFacebook, 
+      href: 'https://www.facebook.com/SSWO.2096',
+      label: 'Facebook'
+    },
+    { 
+      icon: SiInstagram, 
+      href: 'https://www.facebook.com/SSWO.2096',
+      label: 'Instagram'
+    },
+    { 
+      icon: SiYoutube, 
+      href: 'https://www.youtube.com/@SSWO.2096',
+      label: 'YouTube'
+    }
+  ];
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -24,6 +43,20 @@ export default function Footer() {
                 <a href="mailto:sitaramsocialwelfare@gmail.com">
                   sitaramsocialwelfare@gmail.com
                 </a>
+              </div>
+              <div className="flex items-center space-x-4 mt-4">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary-foreground/80 transition-colors"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-6 w-6" />
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -51,7 +84,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-8 border-t border-primary-foreground/10">
           <p className="text-center">
-            © {new Date().getFullYear()} {t('home.title')}. All rights reserved.
+            © {new Date().getFullYear()} {t('home.title')}. All rights reserved. | <a href="https://sitaramsocialwelfare.org.np" className="hover:underline">sitaramsocialwelfare.org.np</a>
           </p>
         </div>
       </div>
