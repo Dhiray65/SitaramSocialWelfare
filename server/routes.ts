@@ -1,11 +1,101 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMemberSchema, insertDonationSchema, insertContactSchema } from "@shared/schema";
+import { insertMemberSchema, insertDonationSchema, insertContactSchema, loginSchema } from "@shared/schema";
 import { z } from "zod";
+import session from "express-session";
+import MemoryStore from "memorystore";
+
+const SessionStore = MemoryStore(session);
+
+declare module "express-session" {
+  interface SessionData {
+    adminId?: number;
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Membership routes
+  // Session middleware
+  app.use(
+    session({
+      cookie: { maxAge: 86400000 },
+      store: new SessionStore({
+        checkPeriod: 86400000 // prune expired entries every 24h
+      }),
+      resave: false,
+      saveUninitialized: false,
+      secret: process.env.SESSION_SECRET || 'your-secret-key'
+    })
+  );
+
+  // Admin authentication middleware
+  const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    next();
+  };
+
+  // Admin authentication routes
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const credentials = loginSchema.parse(req.body);
+      const isValid = await storage.validateAdminCredentials(
+        credentials.username,
+        credentials.password
+      );
+
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const admin = await storage.getAdminByUsername(credentials.username);
+      req.session.adminId = admin!.id;
+      res.json({ message: "Logged in successfully" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid credentials format", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Login failed" });
+      }
+    }
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy(() => {
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  // Protected admin routes
+  app.get("/api/admin/members", requireAdmin, async (_req, res) => {
+    try {
+      const members = await storage.getAllMembers();
+      res.json(members);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch members" });
+    }
+  });
+
+  app.get("/api/admin/donations", requireAdmin, async (_req, res) => {
+    try {
+      const donations = await storage.getAllDonations();
+      res.json(donations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donations" });
+    }
+  });
+
+  app.get("/api/admin/contacts", requireAdmin, async (_req, res) => {
+    try {
+      const contacts = await storage.getAllContacts();
+      res.json(contacts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch contacts" });
+    }
+  });
+
+  // Existing public routes
   app.post("/api/members", async (req, res) => {
     try {
       const memberData = insertMemberSchema.parse(req.body);
@@ -20,16 +110,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/members", async (_req, res) => {
-    try {
-      const members = await storage.getAllMembers();
-      res.json(members);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch members" });
-    }
-  });
-
-  // Donation routes
   app.post("/api/donations", async (req, res) => {
     try {
       const donationData = insertDonationSchema.parse(req.body);
@@ -44,11 +124,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/donations/:id/status", async (req, res) => {
+  app.patch("/api/donations/:id/status", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
-      
+
       if (!['pending', 'completed', 'failed'].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
@@ -60,7 +140,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Contact routes
   app.post("/api/contacts", async (req, res) => {
     try {
       const contactData = insertContactSchema.parse(req.body);
@@ -72,15 +151,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to create contact" });
       }
-    }
-  });
-
-  app.get("/api/contacts", async (_req, res) => {
-    try {
-      const contacts = await storage.getAllContacts();
-      res.json(contacts);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch contacts" });
     }
   });
 
