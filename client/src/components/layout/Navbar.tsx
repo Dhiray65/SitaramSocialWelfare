@@ -20,7 +20,8 @@ export default function Navbar() {
     { href: '/gallery', label: t('nav.gallery') },
     { href: '/contact', label: t('nav.contact') },
     { href: '/membership', label: t('nav.membership') },
-    { href: '/donate', label: t('nav.donate') }
+    { href: '/donate', label: t('nav.donate') },
+    { href: '/events', label: t('nav.events') }
   ];
 
   return (
@@ -30,8 +31,12 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/">
               <a className="flex items-center">
-                <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
-                <span className="ml-2 text-lg font-bold">SSWO</span>
+                <img 
+                  src="/logo.png" 
+                  alt="Sitaram Social Welfare Organization Logo" 
+                  className="h-12 w-auto"
+                />
+                <span className="ml-3 text-lg font-bold hidden sm:block">SSWO</span>
               </a>
             </Link>
           </div>
