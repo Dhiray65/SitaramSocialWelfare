@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { SiFacebook, SiInstagram, SiYoutube } from 'react-icons/si';
+import NewsletterForm from '@/components/NewsletterForm';
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -26,7 +27,8 @@ export default function Footer() {
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Contact Info */}
           <div>
             <h3 className="text-lg font-semibold mb-4">{t('home.title')}</h3>
             <div className="space-y-2">
@@ -61,6 +63,7 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Services */}
           <div>
             <h3 className="text-lg font-semibold mb-4">{t('nav.services')}</h3>
             <ul className="space-y-2">
@@ -71,6 +74,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
@@ -79,6 +83,11 @@ export default function Footer() {
               <li><a href="/membership">{t('nav.membership')}</a></li>
               <li><a href="/donate">{t('nav.donate')}</a></li>
             </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <NewsletterForm />
           </div>
         </div>
 

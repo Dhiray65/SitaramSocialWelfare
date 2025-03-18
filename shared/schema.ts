@@ -34,7 +34,16 @@ export const contacts = pgTable("contacts", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// New admin table
+// Newsletter subscribers table
+export const subscribers = pgTable("subscribers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  subscribed: boolean("subscribed").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// Admin table
 export const admins = pgTable("admins", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -59,6 +68,15 @@ export const insertContactSchema = createInsertSchema(contacts).omit({
   createdAt: true 
 });
 
+export const insertSubscriberSchema = createInsertSchema(subscribers).omit({
+  id: true,
+  createdAt: true,
+  subscribed: true
+}).extend({
+  email: z.string().email("Invalid email address"),
+  name: z.string().optional()
+});
+
 export const insertAdminSchema = createInsertSchema(admins).omit({
   id: true,
   createdAt: true
@@ -73,10 +91,12 @@ export const loginSchema = z.object({
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type InsertDonation = z.infer<typeof insertDonationSchema>;
 export type InsertContact = z.infer<typeof insertContactSchema>;
+export type InsertSubscriber = z.infer<typeof insertSubscriberSchema>;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 export type LoginCredentials = z.infer<typeof loginSchema>;
 
 export type Member = typeof members.$inferSelect;
 export type Donation = typeof donations.$inferSelect;
 export type Contact = typeof contacts.$inferSelect;
+export type Subscriber = typeof subscribers.$inferSelect;
 export type Admin = typeof admins.$inferSelect;
