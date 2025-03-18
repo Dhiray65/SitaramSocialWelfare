@@ -4,11 +4,12 @@ import { format } from 'date-fns';
 import { Calendar, MapPin } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { type Event } from '@shared/schema';
 
 export default function Events() {
   const { t } = useTranslation();
-  
-  const { data: events = [] } = useQuery({
+
+  const { data: events = [] } = useQuery<Event[]>({
     queryKey: ['/api/events'],
   });
 

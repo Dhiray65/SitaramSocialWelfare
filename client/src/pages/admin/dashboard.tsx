@@ -31,6 +31,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { type Member, type Donation, type Contact, type Subscriber, type Event } from "@shared/schema";
 
 function AdminNav() {
   const [, setLocation] = useLocation();
@@ -87,7 +88,7 @@ function AdminNav() {
 }
 
 function MembersTable() {
-  const { data: members = [] } = useQuery({
+  const { data: members = [] } = useQuery<Member[]>({
     queryKey: ['/api/admin/members'],
   });
 
@@ -126,7 +127,7 @@ function MembersTable() {
 }
 
 function DonationsTable() {
-  const { data: donations = [] } = useQuery({
+  const { data: donations = [] } = useQuery<Donation[]>({
     queryKey: ['/api/admin/donations'],
   });
 
@@ -208,7 +209,7 @@ function DonationsTable() {
 }
 
 function ContactsTable() {
-  const { data: contacts = [] } = useQuery({
+  const { data: contacts = [] } = useQuery<Contact[]>({
     queryKey: ['/api/admin/contacts'],
   });
 
@@ -247,7 +248,7 @@ function ContactsTable() {
 }
 
 function SubscribersTable() {
-  const { data: subscribers = [] } = useQuery({
+  const { data: subscribers = [] } = useQuery<Subscriber[]>({
     queryKey: ['/api/admin/subscribers'],
   });
 
@@ -282,7 +283,7 @@ function SubscribersTable() {
 }
 
 function EventsTable() {
-  const { data: events = [] } = useQuery({
+  const { data: events = [] } = useQuery<Event[]>({
     queryKey: ['/api/events'],
   });
 
