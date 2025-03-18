@@ -3,6 +3,17 @@ import { useTranslation } from 'react-i18next';
 export default function About() {
   const { t } = useTranslation();
 
+  const objectives = [
+    "To assist the helpless, disabled, elderly, and vulnerable individuals in society.",
+    "To conduct awareness campaigns related to health, education, and public awareness.",
+    "To carry out special programs for underprivileged children and women.",
+    "To collaborate and coordinate with various national and international organizations for conducting programs.",
+    "To run upliftment programs for women, children, elderly, single women, Dalits, and Muslims.",
+    "To conduct various awareness programs for the overall development of the general public.",
+    "To help preserve and promote various traditional arts and cultures through the organization.",
+    "To carry out activities related to education, health, sports, agriculture, and social transformation."
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -27,14 +38,30 @@ export default function About() {
                 quality education, and healthcare facilities. We envision a community where 
                 social welfare and development go hand in hand.
               </p>
-              <h2 className="text-2xl font-semibold">Our Values</h2>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>Transparency in all our operations</li>
-                <li>Commitment to community development</li>
-                <li>Inclusive approach to social welfare</li>
-                <li>Sustainable development practices</li>
-              </ul>
+              <h2 className="text-2xl font-semibold">Who We Are</h2>
+              <p className="text-muted-foreground">
+                Sitaram Social Welfare Organization (सीताराम सामाजिक कल्याण संस्था) is a non-profit, 
+                public welfare social organization dedicated to uplifting communities and promoting 
+                social development.
+              </p>
             </div>
+          </div>
+        </div>
+
+        {/* Objectives Section */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold mb-8">Our Objectives</h2>
+          <div className="grid grid-cols-1 gap-4">
+            {objectives.map((objective, index) => (
+              <div key={index} className="bg-card p-4 rounded-lg">
+                <p className="text-muted-foreground">
+                  <span className="inline-block w-6 h-6 bg-primary text-primary-foreground rounded-full text-center mr-3">
+                    {index + 1}
+                  </span>
+                  {objective}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
