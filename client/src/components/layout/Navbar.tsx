@@ -30,11 +30,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/">
-              <a>
+              <a className="flex items-center">
                 <img 
                   src="/logo.png" 
-                  alt="Sitaram Social Welfare Organization Logo" 
-                  className="h-14 w-auto"
+                  alt="Sitaram Social Welfare Organization"
+                  className="h-14 w-14 object-contain"
                 />
               </a>
             </Link>
