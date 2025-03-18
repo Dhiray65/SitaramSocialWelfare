@@ -8,6 +8,7 @@ import {
   Heart,
   Mail,
   LogOut,
+  Mail as MailIcon,
   ChevronRight,
   CheckCircle,
   XCircle
@@ -52,6 +53,7 @@ function AdminNav() {
     { href: '/admin/dashboard', label: 'Members', icon: Users },
     { href: '/admin/dashboard/donations', label: 'Donations', icon: Heart },
     { href: '/admin/dashboard/contacts', label: 'Contacts', icon: Mail },
+    { href: '/admin/dashboard/subscribers', label: 'Newsletter', icon: MailIcon },
   ];
 
   return (
@@ -241,6 +243,41 @@ function ContactsTable() {
   );
 }
 
+function SubscribersTable() {
+  const { data: subscribers = [] } = useQuery({
+    queryKey: ['/api/admin/subscribers'],
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Newsletter Subscribers</CardTitle>
+        <CardDescription>View and manage newsletter subscribers</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Subscribed Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {subscribers.map((subscriber) => (
+              <TableRow key={subscriber.id}>
+                <TableCell>{subscriber.name || '-'}</TableCell>
+                <TableCell>{subscriber.email}</TableCell>
+                <TableCell>{new Date(subscriber.createdAt).toLocaleDateString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background flex">
@@ -252,6 +289,7 @@ export default function AdminDashboard() {
           <Route path="/admin/dashboard" component={MembersTable} />
           <Route path="/admin/dashboard/donations" component={DonationsTable} />
           <Route path="/admin/dashboard/contacts" component={ContactsTable} />
+          <Route path="/admin/dashboard/subscribers" component={SubscribersTable} />
         </Switch>
       </main>
     </div>

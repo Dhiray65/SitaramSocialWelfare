@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMemberSchema, insertDonationSchema, insertContactSchema, loginSchema } from "@shared/schema";
+import { insertMemberSchema, insertDonationSchema, insertContactSchema, loginSchema, insertSubscriberSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
 import MemoryStore from "memorystore";
@@ -92,6 +92,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(contacts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch contacts" });
+    }
+  });
+
+  // Newsletter subscriber admin routes
+  app.get("/api/admin/subscribers", requireAdmin, async (_req, res) => {
+    try {
+      const subscribers = await storage.getAllSubscribers();
+      res.json(subscribers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subscribers" });
+    }
+  });
+
+  // Newsletter subscription routes
+  app.post("/api/subscribe", async (req, res) => {
+    try {
+      const subscriberData = insertSubscriberSchema.parse(req.body);
+
+      // Check if already subscribed
+      const existing = await storage.getSubscriberByEmail(subscriberData.email);
+      if (existing) {
+        if (existing.subscribed) {
+          return res.status(400).json({ message: "Email already subscribed" });
+        }
+        // If previously unsubscribed, resubscribe them
+        await storage.createSubscriber(subscriberData);
+        return res.status(200).json({ message: "Successfully resubscribed" });
+      }
+
+      const subscriber = await storage.createSubscriber(subscriberData);
+      res.status(201).json(subscriber);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid subscriber data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create subscriber" });
+      }
+    }
+  });
+
+  app.post("/api/unsubscribe", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      await storage.unsubscribe(email);
+      res.json({ message: "Successfully unsubscribed" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to unsubscribe" });
     }
   });
 

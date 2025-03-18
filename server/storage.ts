@@ -1,4 +1,4 @@
-import { type Member, type Donation, type Contact, type Admin, type InsertMember, type InsertDonation, type InsertContact, type InsertAdmin } from "@shared/schema";
+import { type Member, type Donation, type Contact, type Admin, type Subscriber, type InsertMember, type InsertDonation, type InsertContact, type InsertAdmin, type InsertSubscriber } from "@shared/schema";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -17,6 +17,12 @@ export interface IStorage {
   createContact(contact: InsertContact): Promise<Contact>;
   getAllContacts(): Promise<Contact[]>;
 
+  // Newsletter Subscribers
+  createSubscriber(subscriber: InsertSubscriber): Promise<Subscriber>;
+  getSubscriberByEmail(email: string): Promise<Subscriber | undefined>;
+  getAllSubscribers(): Promise<Subscriber[]>;
+  unsubscribe(email: string): Promise<void>;
+
   // Admin
   createAdmin(admin: InsertAdmin): Promise<Admin>;
   getAdminByUsername(username: string): Promise<Admin | undefined>;
@@ -27,20 +33,24 @@ export class MemStorage implements IStorage {
   private members: Map<number, Member>;
   private donations: Map<number, Donation>;
   private contacts: Map<number, Contact>;
+  private subscribers: Map<number, Subscriber>;
   private admins: Map<number, Admin>;
   private currentMemberId: number;
   private currentDonationId: number;
   private currentContactId: number;
+  private currentSubscriberId: number;
   private currentAdminId: number;
 
   constructor() {
     this.members = new Map();
     this.donations = new Map();
     this.contacts = new Map();
+    this.subscribers = new Map();
     this.admins = new Map();
     this.currentMemberId = 1;
     this.currentDonationId = 1;
     this.currentContactId = 1;
+    this.currentSubscriberId = 1;
     this.currentAdminId = 1;
 
     // Create default admin account
@@ -115,6 +125,35 @@ export class MemStorage implements IStorage {
 
   async getAllContacts(): Promise<Contact[]> {
     return Array.from(this.contacts.values());
+  }
+
+  // Newsletter Subscribers
+  async createSubscriber(subscriber: InsertSubscriber): Promise<Subscriber> {
+    const id = this.currentSubscriberId++;
+    const newSubscriber = {
+      ...subscriber,
+      id,
+      subscribed: true,
+      createdAt: new Date()
+    };
+    this.subscribers.set(id, newSubscriber);
+    return newSubscriber;
+  }
+
+  async getSubscriberByEmail(email: string): Promise<Subscriber | undefined> {
+    return Array.from(this.subscribers.values()).find(sub => sub.email === email);
+  }
+
+  async getAllSubscribers(): Promise<Subscriber[]> {
+    return Array.from(this.subscribers.values()).filter(sub => sub.subscribed);
+  }
+
+  async unsubscribe(email: string): Promise<void> {
+    const subscriber = await this.getSubscriberByEmail(email);
+    if (subscriber) {
+      const updatedSubscriber = { ...subscriber, subscribed: false };
+      this.subscribers.set(subscriber.id, updatedSubscriber);
+    }
   }
 
   // Admin
