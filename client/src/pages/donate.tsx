@@ -197,7 +197,11 @@ export default function Donate() {
                       <FormItem>
                         <FormLabel>Email (Optional)</FormLabel>
                         <FormControl>
-                          <Input type="email" {...field} />
+                          <Input 
+                            type="email" 
+                            {...field} 
+                            value={field.value || ''} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -211,7 +215,10 @@ export default function Donate() {
                       <FormItem>
                         <FormLabel>Phone</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input 
+                            {...field} 
+                            value={field.value || ''} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -225,7 +232,10 @@ export default function Donate() {
                       <FormItem>
                         <FormLabel>Message (Optional)</FormLabel>
                         <FormControl>
-                          <Textarea {...field} />
+                          <Textarea 
+                            {...field}
+                            value={field.value || ''} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
